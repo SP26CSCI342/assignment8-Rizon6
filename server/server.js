@@ -16,7 +16,14 @@ const PORT = process.env.PORT || 3000;
 // Middleware â€” mounted BEFORE any route.
 //   cors()           â€” lets the browser call this server during dev
 //   express.json()   â€” populates req.body on POST requests
-app.use(cors());
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://your-platescout.vercel.app", // CHANGE AFTER STEP D
+    /\.vercel\.app$/,
+  ],
+  credentials: true,
+}));
 app.use(express.json());
 
 // mongoDB connection
@@ -148,6 +155,14 @@ app.post("/api/logout", (req, res) => {
   }
 });
 
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "ok",
+    time: new Date().toISOString(),
+    mongo: mongoose.connection.readyState === 1,
+  });
+});
+
 app.get("/api/users", async (req, res) => {
   const users = await User.find();
 
@@ -227,5 +242,5 @@ app.use((req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Listening on ${PORT}`);
 });
